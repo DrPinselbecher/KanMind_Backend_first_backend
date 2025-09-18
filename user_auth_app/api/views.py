@@ -1,0 +1,44 @@
+# 2. third party imports
+from django.contrib.auth.models import User
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+
+
+# 3. Lokal Imports
+from .serializers import UserProfileSerializer, RegistrationSerializer
+from user_auth_app.permissions import IsOwnerOrAdmin
+
+
+
+class UserListView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+    
+
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsOwnerOrAdmin]
+
+
+class RegistrationView(generics.CreateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = RegistrationSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response(
+            {
+                "token": token.key,
+                "fullname": user.username,
+                "email": user.email,
+                "id": user.id,
+            },
+            status=status.HTTP_201_CREATED,
+        )
