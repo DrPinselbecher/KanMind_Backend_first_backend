@@ -1,5 +1,6 @@
 # 2. Third-party
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from rest_framework import serializers
 
 
@@ -20,7 +21,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8, trim_whitespace=False)
     repeat_password = serializers.CharField(write_only=True, trim_whitespace=False)
-    fullname = serializers.CharField(source='username')
+    fullname = serializers.CharField(source='username', required=True)
+    email = serializers.EmailField(required=True)
 
     class Meta:
         model = User
@@ -48,3 +50,27 @@ class RegistrationSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+    
+
+class EmailAuthTokenSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(style={"input_type": "password"}, trim_whitespace=False)
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+
+        if not email or not password:
+            raise serializers.ValidationError("Both email and password are required.")
+
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid email or password.")
+
+        user = authenticate(request=self.context.get("request"), username=user.username, password=password)
+        if not user:
+            raise serializers.ValidationError("Invalid email or password.")
+
+        attrs["user"] = user
+        return attrs
