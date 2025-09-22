@@ -62,7 +62,6 @@ class EmailAuthTokenSerializer(serializers.Serializer):
 
         if not email or not password:
             raise serializers.ValidationError("Both email and password are required.")
-
         try:
             user = User.objects.get(email__iexact=email)
         except User.DoesNotExist:

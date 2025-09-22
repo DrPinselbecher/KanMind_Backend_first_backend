@@ -1,6 +1,6 @@
 # 2. third party imports
 from django.contrib.auth.models import User
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -11,15 +11,7 @@ from rest_framework.response import Response
 from .serializers import UserProfileSerializer, RegistrationSerializer, EmailAuthTokenSerializer
 from user_auth_app.permissions import IsOwnerOrAdmin
 
-
-
-class UserListView(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated]
-    
-
-class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsOwnerOrAdmin]
