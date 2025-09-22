@@ -7,7 +7,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 
 
-# 3. Lokal Imports
+# 3. lokal imports
 from .serializers import UserProfileSerializer, RegistrationSerializer, EmailAuthTokenSerializer
 from user_auth_app.permissions import IsOwnerOrAdmin
 

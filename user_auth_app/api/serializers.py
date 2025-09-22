@@ -1,4 +1,4 @@
-# 2. Third-party
+# 2. third party imports
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework import serializers
