@@ -1,7 +1,9 @@
 # third party imports
 from django.db.models import Count, Q
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.response import Response
 from .permissions import IsBoardMemberOrOwner
+
 
 # local imports
 from boards_app.models import Board
@@ -27,5 +29,11 @@ class BoardViewSet(viewsets.ModelViewSet):
             )
         )
 
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        board = serializer.save(owner=request.user)
+        board_qs = self.get_queryset().filter(pk=board.pk).first()
+        response_serializer = self.get_serializer(board_qs)
+
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
