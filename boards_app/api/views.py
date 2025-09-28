@@ -7,18 +7,18 @@ from .permissions import IsBoardMemberOrOwner
 
 # local imports
 from boards_app.models import Board
-from .serializers import BoardSerializer
+from .serializers import BoardListSerializer
 
 
 
 class BoardViewSet(viewsets.ModelViewSet):
-    serializer_class = BoardSerializer
+    serializer_class = BoardListSerializer
     permission_classes = [IsBoardMemberOrOwner]
 
     def get_queryset(self):
         return (
             Board.objects
-            .filter(owner=self.request.user)
+            .filter(Q(owner=self.request.user) | Q(members=self.request.user)).distinct()
             .select_related('owner')
             .prefetch_related('members', 'tasks')
             .annotate(
@@ -37,3 +37,8 @@ class BoardViewSet(viewsets.ModelViewSet):
         response_serializer = self.get_serializer(board_qs)
 
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+    
+    # def retrieve(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     serializer = BoardDetailSerializer(instance)
+    #     return Response(serializer.data)

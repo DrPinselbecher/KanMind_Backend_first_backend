@@ -10,7 +10,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["fullname", "email", "id"]
+        fields = ["id", "email", "fullname"]
 
     def validate_fullname(self, value):
         if User.objects.filter(username__iexact=value).exclude(pk=self.instance.pk).exists():
