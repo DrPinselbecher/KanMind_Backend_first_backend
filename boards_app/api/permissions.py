@@ -1,16 +1,20 @@
-from rest_framework.permissions import BasePermission
-from rest_framework.exceptions import NotAuthenticated, PermissionDenied
+# permissions.py
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 class IsMemberOrOwnerOrAdmin(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if not request.user or not request.user.is_authenticated:
-            raise NotAuthenticated("Du bist nicht eingeloggt. Bitte melde dich zuerst an.")
+        user = request.user
+
+        if not user or not user.is_authenticated:
+            return False
+
+        if user.is_superuser:
+            return True
+
+        if request.method in (*SAFE_METHODS, "PUT", "PATCH"):
+            return (user == obj.owner) or (user in obj.members.all())
         
-        if request.user.is_superuser:
-            return True
-        if request.user == obj.owner:
-            return True
-        if request.user in obj.members.all():
-            return True
-        
-        raise PermissionDenied("Du hast keine Berechtigung, dieses Board zu sehen.")
+        if request.method == "DELETE":
+            return user == obj.owner or user.is_superuser
+
+        return False

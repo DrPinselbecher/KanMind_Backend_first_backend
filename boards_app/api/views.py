@@ -46,7 +46,7 @@ class BoardViewSet(viewsets.ModelViewSet):
         try:
             instance = Board.objects.get(pk=board_id)
         except Board.DoesNotExist:
-            raise NotFound(detail=f"Kein Board mit der ID {board_id} gefunden.")
+            raise NotFound(detail="Board not found.")
         self.check_object_permissions(self.request, instance)
         return instance
 
