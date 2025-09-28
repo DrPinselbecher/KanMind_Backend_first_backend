@@ -1,7 +1,10 @@
+import re
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
 from boards_app.models import Board
+from user_auth_app.api.serializers import UserProfileSerializer
+from tasks_app.api.serializers import TaskNestedSerializer
 
 
 
@@ -10,7 +13,8 @@ class BoardListSerializer(serializers.ModelSerializer):
     members = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=User.objects.all(),
-        write_only=True
+        write_only=True,
+        required=False,
     )
         
     member_count = serializers.IntegerField(read_only=True)
@@ -40,3 +44,17 @@ class BoardListSerializer(serializers.ModelSerializer):
         ]
 
 
+class BoardDetailSerializer(serializers.ModelSerializer):
+    members = UserProfileSerializer(many=True, read_only=True)
+    tasks = TaskNestedSerializer(many=True, read_only=True)
+    owner_id = serializers.IntegerField(source="owner.id", read_only=True)
+
+    class Meta:
+        model = Board
+        fields = [
+            "id", 
+            "title", 
+            "members", 
+            "owner_id",
+            "tasks",
+        ]

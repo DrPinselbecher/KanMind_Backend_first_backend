@@ -48,3 +48,20 @@ class TaskListSerializer(serializers.ModelSerializer):
             "reviewer_id",
             "due_date",
         ]
+
+class TaskNestedSerializer(serializers.ModelSerializer):
+    assignee = UserProfileSerializer(many=True, read_only=True)
+    reviewer = UserProfileSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Task
+        fields = [
+            "id",
+            "title",
+            "description",
+            "status",
+            "priority",
+            "assignee",
+            "reviewer",
+            "due_date",
+        ]

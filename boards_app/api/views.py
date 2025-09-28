@@ -2,18 +2,21 @@
 from django.db.models import Count, Q
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from .permissions import IsBoardMemberOrOwner
+from .permissions import IsMemberOrOwnerOrAdmin
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotAuthenticated, PermissionDenied, NotFound
+from django.shortcuts import get_object_or_404
 
 
 # local imports
 from boards_app.models import Board
-from .serializers import BoardListSerializer
+from .serializers import BoardListSerializer, BoardDetailSerializer
 
 
 
 class BoardViewSet(viewsets.ModelViewSet):
     serializer_class = BoardListSerializer
-    permission_classes = [IsBoardMemberOrOwner]
+    permission_classes = [IsAuthenticated, IsMemberOrOwnerOrAdmin]
 
     def get_queryset(self):
         return (
@@ -38,7 +41,16 @@ class BoardViewSet(viewsets.ModelViewSet):
 
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
     
-    # def retrieve(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     serializer = BoardDetailSerializer(instance)
-    #     return Response(serializer.data)
+    def get_object(self):
+        board_id = self.kwargs.get("pk")
+        try:
+            instance = Board.objects.get(pk=board_id)
+        except Board.DoesNotExist:
+            raise NotFound(detail=f"Kein Board mit der ID {board_id} gefunden.")
+        self.check_object_permissions(self.request, instance)
+        return instance
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = BoardDetailSerializer(instance)
+        return Response(serializer.data)
