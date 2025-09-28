@@ -14,7 +14,13 @@ from user_auth_app.permissions import IsOwnerOrAdmin
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
-    permission_classes = [IsOwnerOrAdmin]
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return User.objects.all()
+        return User.objects.filter(id=user.id)
 
 
 class RegistrationView(generics.CreateAPIView):
