@@ -19,9 +19,10 @@ class BoardViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsMemberOrOwnerOrAdmin]
 
     def get_queryset(self):
-        return (
+        user = self.request.user
+        
+        queryset = (
             Board.objects
-            .filter(Q(owner=self.request.user) | Q(members=self.request.user)).distinct()
             .select_related('owner')
             .prefetch_related('members', 'tasks')
             .annotate(
@@ -31,6 +32,12 @@ class BoardViewSet(viewsets.ModelViewSet):
                 tasks_high_prio_count=Count('tasks', filter=Q(tasks__priority='high'), distinct=True),
             )
         )
+
+        if user.is_superuser:
+            return queryset
+        return queryset.filter(
+            Q(owner=user) | Q(members=user)
+        ).distinct()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
