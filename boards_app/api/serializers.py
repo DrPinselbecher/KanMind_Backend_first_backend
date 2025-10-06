@@ -58,3 +58,14 @@ class BoardDetailSerializer(serializers.ModelSerializer):
             "owner_id",
             "tasks",
         ]
+
+
+class BoardUpdateSerializer(serializers.ModelSerializer):
+    members = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=User.objects.all()
+    )
+
+    class Meta:
+        model = Board
+        fields = ["title", "members"]

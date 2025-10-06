@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404
 
 # local imports
 from boards_app.models import Board
-from .serializers import BoardListSerializer, BoardDetailSerializer
+from .serializers import BoardListSerializer, BoardDetailSerializer, BoardUpdateSerializer
 
 
 
@@ -54,3 +54,16 @@ class BoardViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = BoardDetailSerializer(instance)
         return Response(serializer.data)
+    
+    def _update_board(self, request, partial, *args, **kwargs):
+        board = self.get_object()
+        serializer = BoardUpdateSerializer(board, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    
+    def partial_update(self, request, *args, **kwargs):
+        return self._update_board(request, partial=True, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        return self._update_board(request, partial=False, *args, **kwargs)
