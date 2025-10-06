@@ -12,7 +12,7 @@ class IsMemberOrOwnerOrAdmin(BasePermission):
             return True
 
         if request.method in (*SAFE_METHODS, "PUT", "PATCH"):
-            return (user == obj.owner) or (user in obj.members.all())
+            return (user == obj.owner) or (user in obj.members.all()) or (user.is_superuser)
         
         if request.method == "DELETE":
             return user == obj.owner or user.is_superuser
