@@ -16,11 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from core.api.views import check_email
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/boards/', include('boards_app.api.urls')),
     path('api/tasks/', include('tasks_app.api.urls')),
     path('api/auth/', include('user_auth_app.api.urls')),
+    path('api/email-check/', check_email, name='email-check'),
     # path('api-auth/', include('rest_framework.urls')),
 ]
