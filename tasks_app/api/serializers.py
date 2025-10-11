@@ -65,3 +65,6 @@ class TaskNestedSerializer(serializers.ModelSerializer):
             "reviewer",
             "due_date",
         ]
+
+class TaskDetailSerializer(serializers.ModelSerializer):
+    pass
