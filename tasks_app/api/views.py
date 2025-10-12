@@ -42,9 +42,7 @@ class TaskCommentsViewSet(viewsets.ModelViewSet):
     queryset = Comments.objects.all()
 
     def perform_create(self, serializer):
-        print("KWARGS:", self.kwargs)
         task_id = self.kwargs.get("task_pk")
-        print("Task ID:", task_id)
         task = get_object_or_404(Task, pk=task_id)
         serializer.save(task=task, author=self.request.user.username)
 
