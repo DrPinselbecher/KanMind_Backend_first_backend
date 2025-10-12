@@ -32,6 +32,12 @@ class TaskListSerializer(serializers.ModelSerializer):
         task.assignee.set(assignees)
         task.reviewer.set(reviewers)
         return task
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get("request", None)
+        if request and request.method in ["PUT", "PATCH"]:
+            self.fields.pop("board", None)
 
     class Meta:
         model = Task
@@ -65,6 +71,3 @@ class TaskNestedSerializer(serializers.ModelSerializer):
             "reviewer",
             "due_date",
         ]
-
-class TaskDetailSerializer(serializers.ModelSerializer):
-    pass
