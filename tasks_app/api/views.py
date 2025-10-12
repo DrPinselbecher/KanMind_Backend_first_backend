@@ -1,9 +1,12 @@
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status 
+from django.shortcuts import get_object_or_404
 
-from tasks_app.models import Task
-from .serializers import TaskListSerializer
-from .permissions import TaskPermission
+from tasks_app.models import Task, Comments
+from .serializers import TaskListSerializer, CommentSerializer
+from .permissions import TaskPermission, IsBoardMemberForTaskComments
 
 
 class TasksViewSet(viewsets.ModelViewSet):
@@ -21,7 +24,8 @@ class TaskAssignedToCurrentUser(generics.ListAPIView):
         filtred_tasks = Task.objects.filter(assignee=user)
         return filtred_tasks
     
-class TaskreviewingCurrentUser(generics.ListAPIView):
+
+class TaskReviewingCurrentUser(generics.ListAPIView):
     serializer_class = TaskListSerializer
     permission_classes = [IsAuthenticated]
 
@@ -29,3 +33,23 @@ class TaskreviewingCurrentUser(generics.ListAPIView):
         user = self.request.user
         filtred_tasks = Task.objects.filter(reviewer=user)
         return filtred_tasks
+    
+
+
+class TaskCommentsViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsBoardMemberForTaskComments]
+    queryset = Comments.objects.all()
+
+    def perform_create(self, serializer):
+        print("KWARGS:", self.kwargs)
+        task_id = self.kwargs.get("task_pk")
+        print("Task ID:", task_id)
+        task = get_object_or_404(Task, pk=task_id)
+        serializer.save(task=task, author=self.request.user.username)
+
+
+    def get_object(self):
+        obj = super().get_object()
+        self.check_object_permissions(self.request, obj)
+        return obj

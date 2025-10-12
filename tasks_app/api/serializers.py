@@ -1,7 +1,8 @@
+import re
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from tasks_app.models import Task
+from tasks_app.models import Task, Comments
 from boards_app.models import Board
 from user_auth_app.api.serializers import UserProfileSerializer
 
@@ -71,3 +72,9 @@ class TaskNestedSerializer(serializers.ModelSerializer):
             "reviewer",
             "due_date",
         ]
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['id', 'created_at', 'author', 'content']
+        read_only_fields = ['id', 'created_at', 'author']

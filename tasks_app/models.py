@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 
 class Comments(models.Model):
+    task = models.ForeignKey('tasks_app.Task', related_name='comments', on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.CharField(max_length=70)
     content = models.TextField()
@@ -35,8 +36,6 @@ class Task(models.Model):
     assignee = models.ManyToManyField(User, related_name="assigned_tasks", blank=True)
     reviewer = models.ManyToManyField(User, related_name='review_tasks', blank=True)
     due_date = models.DateField(null=True, blank=True)
-    comments = models.ManyToManyField(Comments, related_name='comments_tasks', blank=True)
-
 
     def __str__(self):
         return self.title

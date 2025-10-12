@@ -1,5 +1,7 @@
 from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound
+from tasks_app.models import Task
 
 class TaskPermission(BasePermission):
 
@@ -54,3 +56,30 @@ class TaskPermission(BasePermission):
             raise PermissionDenied("Only the task creator or board owner can delete this task.")
 
         return False
+
+
+class IsBoardMemberForTaskComments(BasePermission):
+    message = "Only board members can manage comments on this task."
+
+    def has_permission(self, request, view):
+        task_id = view.kwargs.get("task_pk")
+        if not task_id:
+            raise NotFound("Task id missing.")
+        try:
+            task = Task.objects.select_related("board").get(pk=task_id)
+        except Task.DoesNotExist:
+            raise NotFound("Task not found.")
+        user = request.user
+        board = task.board
+        if user.is_superuser or board.owner == user or user in board.members.all():
+            return True
+        raise PermissionDenied(self.message)
+
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        board = obj.task.board 
+        if request.method == "DELETE":
+            if user.is_superuser or obj.author == user.username or board.owner == user:
+                return True
+            raise PermissionDenied("Only the comment author, board owner, or admin can delete this comment.")
+        return user.is_superuser or board.owner == user or user in board.members.all()
