@@ -37,7 +37,7 @@ class RegistrationView(generics.CreateAPIView):
                 "token": token.key,
                 "fullname": user.username,
                 "email": user.email,
-                "id": user.id,
+                "user_id": user.id,
             },
             status=status.HTTP_201_CREATED,
         )
@@ -55,5 +55,5 @@ class LoginView(ObtainAuthToken):
             'token': token.key,
             'fullname': user.username,
             'email': user.email,
-            'id': user.id,
+            'user_id': user.id,
         })
