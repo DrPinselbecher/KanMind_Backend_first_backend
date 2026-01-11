@@ -13,6 +13,8 @@ class Board(models.Model):
         related_name='owned_boards',
         on_delete=models.CASCADE
     )
+    class Meta:
+        ordering = ["title"]
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
