@@ -10,35 +10,22 @@ class TaskListSerializer(serializers.ModelSerializer):
     board = serializers.PrimaryKeyRelatedField(queryset=Board.objects.all())
 
     assignee_id = serializers.PrimaryKeyRelatedField(
-        many=True,
         queryset=User.objects.all(),
         write_only=True,
-        source="assignee"
+        source="assignee",
+        required=False,
+        allow_null=True,
     )
     reviewer_id = serializers.PrimaryKeyRelatedField(
-        many=True,
         queryset=User.objects.all(),
         write_only=True,
-        source="reviewer"
+        source="reviewer",
+        required=False,
+        allow_null=True,
     )
 
-    assignee = UserProfileSerializer(many=True, read_only=True)
-    reviewer = UserProfileSerializer(many=True, read_only=True)
-
-
-    def create(self, validated_data):
-        assignees = validated_data.pop('assignee', [])
-        reviewers = validated_data.pop('reviewer', [])
-        task = Task.objects.create(**validated_data)
-        task.assignee.set(assignees)
-        task.reviewer.set(reviewers)
-        return task
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        request = self.context.get("request", None)
-        if request and request.method in ["PUT", "PATCH"]:
-            self.fields.pop("board", None)
+    assignee = UserProfileSerializer(read_only=True)
+    reviewer = UserProfileSerializer(read_only=True)
 
     class Meta:
         model = Task

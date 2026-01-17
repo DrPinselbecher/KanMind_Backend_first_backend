@@ -33,8 +33,8 @@ class Task(models.Model):
     description = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES)
-    assignee = models.ManyToManyField(User, related_name="assigned_tasks", blank=True)
-    reviewer = models.ManyToManyField(User, related_name='review_tasks', blank=True)
+    assignee = models.ForeignKey(User, related_name="assigned_tasks", blank=True, null=True, on_delete=models.SET_NULL)
+    reviewer = models.ForeignKey(User, related_name='review_tasks', blank=True, null=True, on_delete=models.SET_NULL)
     due_date = models.DateField(null=True, blank=True)
 
     def __str__(self):

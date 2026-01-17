@@ -26,7 +26,7 @@ class TaskPermission(BasePermission):
             try:
                 board = Board.objects.get(pk=board_id)
             except Board.DoesNotExist:
-                raise PermissionDenied("Board does not exist.")
+                raise NotFound("Board does not exist.")
             if board.owner == user or user in board.members.all():
                 return True
             raise PermissionDenied("You do not have permission to create a task on this board.")
