@@ -20,17 +20,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8, trim_whitespace=False)
-    repeat_password = serializers.CharField(write_only=True, trim_whitespace=False)
+    repeated_password = serializers.CharField(write_only=True, trim_whitespace=False)
     fullname = serializers.CharField(source='username', required=True)
     email = serializers.EmailField(required=True)
 
     class Meta:
         model = User
-        fields = ["fullname", "email", "password", "repeat_password"]
+        fields = ["fullname", "email", "password", "repeated_password"]
 
     def validate(self, attrs):
-        if attrs["password"] != attrs["repeat_password"]:
-            raise serializers.ValidationError({"repeat_password": "Passwords must match."})
+        if attrs["password"] != attrs["repeated_password"]:
+            raise serializers.ValidationError({"repeated_password": "Passwords must match."})
         return attrs
 
     def validate_fullname(self, value):
@@ -44,7 +44,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        validated_data.pop("repeat_password")
+        validated_data.pop("repeated_password")
         password = validated_data.pop("password")
         user = User(**validated_data)
         user.set_password(password)
