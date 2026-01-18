@@ -1,7 +1,5 @@
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status 
 from django.shortcuts import get_object_or_404
 
 from tasks_app.models import Task, Comments
@@ -13,6 +11,9 @@ class TasksViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskListSerializer
     permission_classes = [TaskPermission]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
 
 class TaskAssignedToCurrentUser(generics.ListAPIView):

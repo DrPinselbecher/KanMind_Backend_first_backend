@@ -27,6 +27,12 @@ class TaskListSerializer(serializers.ModelSerializer):
     assignee = UserProfileSerializer(read_only=True)
     reviewer = UserProfileSerializer(read_only=True)
 
+    comments_count = serializers.SerializerMethodField()
+
+    def get_comments_count(self, obj):
+        return obj.comments.count()
+
+
     class Meta:
         model = Task
         fields = [
@@ -41,11 +47,12 @@ class TaskListSerializer(serializers.ModelSerializer):
             "reviewer",
             "reviewer_id",
             "due_date",
+            "comments_count",
         ]
 
 class TaskNestedSerializer(serializers.ModelSerializer):
-    assignee = UserProfileSerializer(many=True, read_only=True)
-    reviewer = UserProfileSerializer(many=True, read_only=True)
+    assignee = UserProfileSerializer(read_only=True)
+    reviewer = UserProfileSerializer(read_only=True)
 
     class Meta:
         model = Task

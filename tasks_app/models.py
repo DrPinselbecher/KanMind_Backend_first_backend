@@ -28,6 +28,14 @@ class Task(models.Model):
         ('high', 'High'),
     ]
 
+    created_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_tasks"
+    )
+
     board = models.ForeignKey('boards_app.Board', related_name='tasks', on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
